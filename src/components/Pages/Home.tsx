@@ -1,5 +1,5 @@
 import React from 'react';
-import { Moon, Star, Shield, User, Play } from 'lucide-react';
+import { Moon, Star, Shield, User, Play, X } from 'lucide-react';
 import Carousel from '../UI/Carousel';
 import QuotesCarousel from '../UI/QuotesCarousel';
 import { modules } from '../../data/modules';
@@ -15,21 +15,59 @@ const Home: React.FC<HomeProps> = ({ onSelectModule }) => {
   const { isDark } = useTheme();
   const { isReturningUser } = useAuth();
   const { profilePicture, hasProfilePicture } = useProfilePicture();
+  const [showWelcomePopup, setShowWelcomePopup] = React.useState(false);
+
+  // Show welcome popup for returning users
+  React.useEffect(() => {
+    if (isReturningUser()) {
+      const timer = setTimeout(() => {
+        setShowWelcomePopup(true);
+      }, 800); // Show after 800ms for better UX
+
+      return () => clearTimeout(timer);
+    }
+  }, [isReturningUser]);
+
+  const handleCloseWelcomePopup = () => {
+    setShowWelcomePopup(false);
+  };
 
   return (
-    <div className={`min-h-screen transition-colors duration-300 ${
+    <div className={`min-h-screen transition-colors duration-300 relative ${
       isDark 
         ? 'bg-gradient-to-br from-slate-950 via-slate-900 to-emerald-950' 
         : 'bg-gradient-to-br from-white via-emerald-50/80 to-emerald-100/60'
     }`}>
-      {/* Container with max width for larger screens */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <header className="relative py-8 lg:py-12 text-center">
-          {/* Welcome Back Message and Profile Picture - Only for returning users */}
-          {isReturningUser() && (
-            <div className="flex items-center justify-center gap-4 mb-6 max-w-md mx-auto">
-              <div className="w-16 h-16 rounded-full overflow-hidden border-4 border-emerald-500/30 shadow-lg flex-shrink-0">
+      {/* Welcome Back Popup */}
+      {showWelcomePopup && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          {/* Backdrop */}
+          <div 
+            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+            onClick={handleCloseWelcomePopup}
+          />
+          
+          {/* Popup Content */}
+          <div className={`relative max-w-sm w-full rounded-2xl p-6 border shadow-2xl transform transition-all duration-300 ${
+            isDark 
+              ? 'bg-slate-900/95 border-slate-700' 
+              : 'bg-white/95 border-emerald-200/50 shadow-emerald-500/10'
+          }`}>
+            {/* Close Button */}
+            <button
+              onClick={handleCloseWelcomePopup}
+              className={`absolute top-4 right-4 p-1 rounded-full transition-colors ${
+                isDark 
+                  ? 'hover:bg-slate-800 text-slate-400 hover:text-white' 
+                  : 'hover:bg-gray-100 text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              <X className="w-4 h-4" />
+            </button>
+
+            {/* Profile Picture and Content */}
+            <div className="flex items-start gap-4 mb-4">
+              <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-emerald-500/30 shadow-md flex-shrink-0">
                 {hasProfilePicture ? (
                   <img
                     src={profilePicture!}
@@ -38,29 +76,41 @@ const Home: React.FC<HomeProps> = ({ onSelectModule }) => {
                   />
                 ) : (
                   <div className="w-full h-full bg-emerald-500 flex items-center justify-center">
-                    <User className="w-8 h-8 text-white" />
+                    <User className="w-6 h-6 text-white" />
                   </div>
                 )}
               </div>
-              <div className={`flex-1 text-left p-4 rounded-2xl transition-colors duration-300 ${
-                isDark 
-                  ? 'bg-gradient-to-r from-emerald-500/10 to-emerald-600/10 border border-emerald-500/30' 
-                  : 'bg-gradient-to-r from-emerald-100/80 to-emerald-200/60 border border-emerald-300/50 shadow-sm'
-              }`}>
-                <h2 className={`text-lg font-bold mb-1 transition-colors duration-300 ${
+              
+              <div className="flex-1 min-w-0">
+                <h3 className={`text-lg font-bold mb-1 transition-colors duration-300 ${
                   isDark ? 'text-white' : 'text-emerald-900'
                 }`}>
                   🌟 Bem-vindo de volta!
-                </h2>
-                <p className={`text-xs transition-colors duration-300 ${
+                </h3>
+                <p className={`text-sm leading-relaxed transition-colors duration-300 ${
                   isDark ? 'text-slate-300' : 'text-emerald-700'
                 }`}>
-                  Continue sua jornada para um sono perfeito
+                  Continue sua jornada para um sono perfeito. Suas técnicas militares te esperam!
                 </p>
               </div>
             </div>
-          )}
-          
+
+            {/* Action Button */}
+            <button
+              onClick={handleCloseWelcomePopup}
+              className="w-full bg-emerald-500 hover:bg-emerald-600 text-white py-3 rounded-xl font-medium transition-colors duration-200 flex items-center justify-center gap-2"
+            >
+              <Play className="w-4 h-4" />
+              Continuar Jornada
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Container with max width for larger screens */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Header */}
+        <header className="relative py-8 lg:py-12 text-center">
           <div className={`absolute inset-0 transition-colors duration-300 ${
             isDark 
               ? 'bg-gradient-to-b from-emerald-900/20 to-transparent' 
