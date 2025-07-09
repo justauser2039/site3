@@ -366,6 +366,7 @@ const DreamStoryGame: React.FC<DreamStoryGameProps> = ({ onBack }) => {
   const [triggeredSituations, setTriggeredSituations] = useState<Set<string>>(new Set());
   const [showSaveMessage, setShowSaveMessage] = useState(false);
   const [hasStarted, setHasStarted] = useState(false);
+  const [showWelcome, setShowWelcome] = useState(true);
 
   const [gameState, setGameState] = useState<GameState>({
     day: 1,
@@ -615,8 +616,12 @@ const DreamStoryGame: React.FC<DreamStoryGameProps> = ({ onBack }) => {
     // Carregar jogo automaticamente ao iniciar
     loadGame();
 
-    // Marcar como iniciado imediatamente
-    setHasStarted(true);
+    // Verificar se já jogou antes para não mostrar boas-vindas
+    const hasPlayedBefore = localStorage.getItem('dreamStoryGameSave');
+    if (hasPlayedBefore) {
+      setShowWelcome(false);
+      setHasStarted(true);
+    }
   }, []);
 
   const toggleGame = () => {
@@ -625,6 +630,12 @@ const DreamStoryGame: React.FC<DreamStoryGameProps> = ({ onBack }) => {
     if (newIsPlaying) {
       setHasStarted(true);
     }
+  };
+
+  const handleWelcomeStart = () => {
+    setShowWelcome(false);
+    setHasStarted(true);
+    setGameState(prev => ({ ...prev, isPlaying: true }));
   };
 
   const resetGame = () => {
@@ -652,7 +663,8 @@ const DreamStoryGame: React.FC<DreamStoryGameProps> = ({ onBack }) => {
     setCurrentSituation(null);
     setShowConsequence(null);
     setTriggeredSituations(new Set());
-    setHasStarted(true); // Manter como iniciado
+    setShowWelcome(true); // Mostrar boas-vindas novamente após reset
+    setHasStarted(false);
     localStorage.removeItem('dreamStoryGameSave');
   };
 
@@ -710,7 +722,67 @@ const DreamStoryGame: React.FC<DreamStoryGameProps> = ({ onBack }) => {
       social: value >= 70 ? 'bg-pink-500' : value >= 40 ? 'bg-yellow-500' : 'bg-red-500'
     };
     return bgColors[factor as keyof typeof bgColors] || 'bg-gray-500';
+  // Tela de Boas-vindas
+  if (showWelcome) {
+    return (
+      <div className={`min-h-screen transition-colors duration-300 ${
+        isDark ? 'bg-slate-950' : 'bg-gradient-to-br from-white via-emerald-50/80 to-emerald-100/60'
+      }`}>
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className={`max-w-lg w-full rounded-3xl p-8 border-2 transition-all duration-300 transform scale-100 ${
+            isDark 
+              ? 'bg-gradient-to-br from-slate-900 to-slate-800 border-slate-600 shadow-2xl' 
+              : 'bg-gradient-to-br from-white to-gray-50 border-gray-300 shadow-2xl'
+          }`}>
+            <div className="text-center">
+              <div className="w-24 h-24 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
+                <span className="text-4xl">🎮</span>
+              </div>
+              <h2 className={`text-3xl font-bold mb-4 transition-colors duration-300 ${
+                isDark ? 'text-white' : 'text-gray-900'
+              }`}>
+                Bem-vindo ao Dream Story!
+              </h2>
+              <p className={`text-base leading-relaxed mb-8 transition-colors duration-300 ${
+                isDark ? 'text-slate-300' : 'text-gray-700'
+              }`}>
+                Você vai acompanhar a vida de Alex durante 14 dias, tomando decisões que afetam sua saúde, sono, energia, produtividade e vida social. 
+                Cada escolha tem consequências!
+              </p>
+              
+              <div className={`p-4 rounded-xl mb-6 transition-colors duration-300 ${
+                isDark 
+                  ? 'bg-emerald-500/10 border border-emerald-500/30' 
+                  : 'bg-emerald-100/80 border border-emerald-300/50'
+              }`}>
+                <h3 className={`font-bold mb-2 transition-colors duration-300 ${
+                  isDark ? 'text-emerald-400' : 'text-emerald-600'
+                }`}>
+                  💡 Dicas para jogar:
+                </h3>
+                <ul className={`text-sm space-y-1 text-left transition-colors duration-300 ${
+                  isDark ? 'text-slate-300' : 'text-gray-700'
+                }`}>
+                  <li>• O tempo passa automaticamente</li>
+                  <li>• Situações especiais aparecerão durante o jogo</li>
+                  <li>• Monitore os status de Alex constantemente</li>
+                  <li>• Suas escolhas afetam o final da história</li>
+                </ul>
+              </div>
   };
+              <button
+                onClick={handleWelcomeStart}
+                className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white py-4 px-8 rounded-2xl font-bold text-lg transition-all duration-200 transform hover:scale-105 shadow-lg flex items-center gap-2 mx-auto"
+              >
+                <Play className="w-5 h-5" />
+                Vamos lá!
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   // Modal de Situação
   if (currentSituation) {
@@ -793,11 +865,7 @@ const DreamStoryGame: React.FC<DreamStoryGameProps> = ({ onBack }) => {
               <button
                 onClick={() => {
                   setShowConsequence(null);
-                  // Pausar temporariamente para mostrar situação
-                  setGameState(prev => ({ ...prev, isPlaying: false }));
-                  if (!gameState.isPlaying) {
-                    setGameState(prev => ({ ...prev, isPlaying: true }));
-                  }
+                  setGameState(prev => ({ ...prev, isPlaying: true }));
                 }}
                 className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white py-4 px-8 rounded-2xl font-bold text-lg transition-all duration-200 transform hover:scale-105 shadow-lg"
               >
