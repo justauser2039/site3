@@ -365,6 +365,7 @@ const DreamStoryGame: React.FC<DreamStoryGameProps> = ({ onBack }) => {
   const [showConsequence, setShowConsequence] = useState<string | null>(null);
   const [triggeredSituations, setTriggeredSituations] = useState<Set<string>>(new Set());
   const [showSaveMessage, setShowSaveMessage] = useState(false);
+  const [hasStarted, setHasStarted] = useState(false);
 
   const [gameState, setGameState] = useState<GameState>({
     day: 1,
@@ -379,7 +380,7 @@ const DreamStoryGame: React.FC<DreamStoryGameProps> = ({ onBack }) => {
       social: 30
     },
     score: 0,
-    isPlaying: true, // Começar automaticamente no auto play
+    isPlaying: false,
     gameSpeed: 1,
     completedActivities: [],
     currentActivity: null,
@@ -509,9 +510,14 @@ const DreamStoryGame: React.FC<DreamStoryGameProps> = ({ onBack }) => {
     if (savedData) {
       try {
         const { gameState: savedGameState, triggeredSituations: savedSituations } = JSON.parse(savedData);
-        // Ao carregar jogo salvo, também iniciar no auto play
-        setGameState({ ...savedGameState, isPlaying: true });
+        setGameState(savedGameState);
         setTriggeredSituations(new Set(savedSituations));
+        
+        // Iniciar automaticamente após carregar
+        setTimeout(() => {
+          setGameState(prev => ({ ...prev, isPlaying: true }));
+          setHasStarted(true);
+        }, 100);
       } catch (error) {
         console.error('Erro ao carregar jogo:', error);
       }
@@ -610,15 +616,12 @@ const DreamStoryGame: React.FC<DreamStoryGameProps> = ({ onBack }) => {
   useEffect(() => {
     // Carregar jogo automaticamente ao iniciar
     loadGame();
-    
-    // Se não há jogo salvo, começar automaticamente
-    const savedData = localStorage.getItem('dreamStoryGameSave');
-    if (!savedData) {
-      // Pequeno delay para garantir que o componente foi montado
-      setTimeout(() => {
-        setGameState(prev => ({ ...prev, isPlaying: true }));
-      }, 500);
-    }
+
+    // Iniciar o jogo automaticamente após um pequeno delay
+    setTimeout(() => {
+      setGameState(prev => ({ ...prev, isPlaying: true }));
+      setHasStarted(true);
+    }, 100);
   }, []);
 
   const toggleGame = () => {
@@ -640,7 +643,7 @@ const DreamStoryGame: React.FC<DreamStoryGameProps> = ({ onBack }) => {
         social: 30
       },
       score: 0,
-      isPlaying: true, // Reiniciar automaticamente no auto play
+      isPlaying: false,
       gameSpeed: 1,
       completedActivities: [],
       currentActivity: null,
@@ -650,7 +653,14 @@ const DreamStoryGame: React.FC<DreamStoryGameProps> = ({ onBack }) => {
     setCurrentSituation(null);
     setShowConsequence(null);
     setTriggeredSituations(new Set());
+    setHasStarted(false);
     localStorage.removeItem('dreamStoryGameSave');
+    
+    // Iniciar automaticamente após reset
+    setTimeout(() => {
+      setGameState(prev => ({ ...prev, isPlaying: true }));
+      setHasStarted(true);
+    }, 100);
   };
 
   const changeRoom = (roomId: string) => {
@@ -897,12 +907,12 @@ const DreamStoryGame: React.FC<DreamStoryGameProps> = ({ onBack }) => {
               <button
                 onClick={toggleGame}
                 className={`p-3 rounded-full transition-all duration-200 hover:scale-110 ${
-                  gameState.isPlaying
+                  gameState.isPlaying || hasStarted
                     ? 'bg-red-500 hover:bg-red-600 text-white'
                     : 'bg-emerald-500 hover:bg-emerald-600 text-white'
                 }`}
               >
-                {gameState.isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
+                {gameState.isPlaying || hasStarted ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
               </button>
               
               <button
