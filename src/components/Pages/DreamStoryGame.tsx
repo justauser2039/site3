@@ -1,6 +1,3 @@
-The script is missing several closing brackets. Here's the fixed version with the added closing brackets:
-
-```typescript
 // ... [previous code remains the same until the Welcome screen return statement]
 
   // Tela de Boas-vindas
@@ -32,8 +29,3 @@ The script is missing several closing brackets. Here's the fixed version with th
   }
 
   // ... [rest of the code remains the same]
-```
-
-The main issue was in the welcome screen section where there were some missing closing brackets for the JSX elements. I've added the necessary closing brackets to properly close the welcome screen component structure.
-
-The rest of the code appears to be properly structured and doesn't require additional closing brackets. All other component sections (situation modal, consequence modal, and main game interface) are properly closed.
