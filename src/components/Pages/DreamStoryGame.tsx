@@ -379,7 +379,7 @@ const DreamStoryGame: React.FC<DreamStoryGameProps> = ({ onBack }) => {
       social: 30
     },
     score: 0,
-    isPlaying: false,
+    isPlaying: true, // Começar automaticamente no auto play
     gameSpeed: 1,
     completedActivities: [],
     currentActivity: null,
@@ -509,7 +509,8 @@ const DreamStoryGame: React.FC<DreamStoryGameProps> = ({ onBack }) => {
     if (savedData) {
       try {
         const { gameState: savedGameState, triggeredSituations: savedSituations } = JSON.parse(savedData);
-        setGameState(savedGameState);
+        // Ao carregar jogo salvo, também iniciar no auto play
+        setGameState({ ...savedGameState, isPlaying: true });
         setTriggeredSituations(new Set(savedSituations));
       } catch (error) {
         console.error('Erro ao carregar jogo:', error);
@@ -609,6 +610,15 @@ const DreamStoryGame: React.FC<DreamStoryGameProps> = ({ onBack }) => {
   useEffect(() => {
     // Carregar jogo automaticamente ao iniciar
     loadGame();
+    
+    // Se não há jogo salvo, começar automaticamente
+    const savedData = localStorage.getItem('dreamStoryGameSave');
+    if (!savedData) {
+      // Pequeno delay para garantir que o componente foi montado
+      setTimeout(() => {
+        setGameState(prev => ({ ...prev, isPlaying: true }));
+      }, 500);
+    }
   }, []);
 
   const toggleGame = () => {
@@ -630,7 +640,7 @@ const DreamStoryGame: React.FC<DreamStoryGameProps> = ({ onBack }) => {
         social: 30
       },
       score: 0,
-      isPlaying: false,
+      isPlaying: true, // Reiniciar automaticamente no auto play
       gameSpeed: 1,
       completedActivities: [],
       currentActivity: null,
