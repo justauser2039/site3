@@ -380,7 +380,7 @@ const DreamStoryGame: React.FC<DreamStoryGameProps> = ({ onBack }) => {
       social: 30
     },
     score: 0,
-    isPlaying: false,
+    isPlaying: true, // Iniciar como true desde o estado inicial
     gameSpeed: 1,
     completedActivities: [],
     currentActivity: null,
@@ -513,11 +513,9 @@ const DreamStoryGame: React.FC<DreamStoryGameProps> = ({ onBack }) => {
         setGameState(savedGameState);
         setTriggeredSituations(new Set(savedSituations));
         
-        // Iniciar automaticamente após carregar
-        setTimeout(() => {
-          setGameState(prev => ({ ...prev, isPlaying: true }));
-          setHasStarted(true);
-        }, 100);
+        // Garantir que está rodando após carregar
+        setGameState(prev => ({ ...prev, isPlaying: true }));
+        setHasStarted(true);
       } catch (error) {
         console.error('Erro ao carregar jogo:', error);
       }
@@ -617,15 +615,16 @@ const DreamStoryGame: React.FC<DreamStoryGameProps> = ({ onBack }) => {
     // Carregar jogo automaticamente ao iniciar
     loadGame();
 
-    // Iniciar o jogo automaticamente após um pequeno delay
-    setTimeout(() => {
-      setGameState(prev => ({ ...prev, isPlaying: true }));
-      setHasStarted(true);
-    }, 100);
+    // Marcar como iniciado imediatamente
+    setHasStarted(true);
   }, []);
 
   const toggleGame = () => {
-    setGameState(prev => ({ ...prev, isPlaying: !prev.isPlaying }));
+    const newIsPlaying = !gameState.isPlaying;
+    setGameState(prev => ({ ...prev, isPlaying: newIsPlaying }));
+    if (newIsPlaying) {
+      setHasStarted(true);
+    }
   };
 
   const resetGame = () => {
@@ -643,7 +642,7 @@ const DreamStoryGame: React.FC<DreamStoryGameProps> = ({ onBack }) => {
         social: 30
       },
       score: 0,
-      isPlaying: false,
+      isPlaying: true, // Iniciar como true após reset
       gameSpeed: 1,
       completedActivities: [],
       currentActivity: null,
@@ -653,14 +652,8 @@ const DreamStoryGame: React.FC<DreamStoryGameProps> = ({ onBack }) => {
     setCurrentSituation(null);
     setShowConsequence(null);
     setTriggeredSituations(new Set());
-    setHasStarted(false);
+    setHasStarted(true); // Manter como iniciado
     localStorage.removeItem('dreamStoryGameSave');
-    
-    // Iniciar automaticamente após reset
-    setTimeout(() => {
-      setGameState(prev => ({ ...prev, isPlaying: true }));
-      setHasStarted(true);
-    }, 100);
   };
 
   const changeRoom = (roomId: string) => {
@@ -800,7 +793,11 @@ const DreamStoryGame: React.FC<DreamStoryGameProps> = ({ onBack }) => {
               <button
                 onClick={() => {
                   setShowConsequence(null);
-                  setGameState(prev => ({ ...prev, isPlaying: true }));
+                  // Pausar temporariamente para mostrar situação
+                  setGameState(prev => ({ ...prev, isPlaying: false }));
+                  if (!gameState.isPlaying) {
+                    setGameState(prev => ({ ...prev, isPlaying: true }));
+                  }
                 }}
                 className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white py-4 px-8 rounded-2xl font-bold text-lg transition-all duration-200 transform hover:scale-105 shadow-lg"
               >
