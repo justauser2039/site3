@@ -6,11 +6,11 @@ The script is missing several closing brackets. Here's the fixed version with th
   // Tela de Boas-vindas
   if (showWelcome) {
     return (
-      <div className={\`min-h-screen transition-colors duration-300 ${
+      <div className={`min-h-screen transition-colors duration-300 ${
         isDark ? 'bg-slate-950' : 'bg-gradient-to-br from-white via-emerald-50/80 to-emerald-100/60'
       }`}>
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className={\`max-w-lg w-full rounded-3xl p-8 border-2 transition-all duration-300 transform scale-100 ${
+          <div className={`max-w-lg w-full rounded-3xl p-8 border-2 transition-all duration-300 transform scale-100 ${
             isDark 
               ? 'bg-gradient-to-br from-slate-900 to-slate-800 border-slate-600 shadow-2xl' 
               : 'bg-gradient-to-br from-white to-gray-50 border-gray-300 shadow-2xl'
